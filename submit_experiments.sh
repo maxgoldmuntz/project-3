@@ -7,9 +7,9 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=04:00:00
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 
 mkdir -p logs
-source $HOME/.cargo/env
 
 echo "=== STARTING TASK 3 EXPERIMENTS ==="
 
@@ -18,10 +18,10 @@ echo "=== STARTING TASK 3 EXPERIMENTS ==="
 # Note: 100% is already done in main job, doing 30% and 50% here.
 
 echo ">>> Running Exp: QA Size 30%"
-uv run train_task1.py --task qa --model_name roberta-base --lora_rank 8 --train_size 0.3 --output_dir ./results
+# uv run train_task1.py --task qa --model_name roberta-base --lora_rank 8 --train_size 0.3 --output_dir ./results
 
 echo ">>> Running Exp: QA Size 50%"
-uv run train_task1.py --task qa --model_name roberta-base --lora_rank 8 --train_size 0.5 --output_dir ./results
+# uv run train_task1.py --task qa --model_name roberta-base --lora_rank 8 --train_size 0.5 --output_dir ./results
 
 # --- EXPERIMENT B: LORA RANK (Target: QA Model) ---
 # Instruction: "LoRA rank (choose 3 values)"

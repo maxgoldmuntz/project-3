@@ -7,11 +7,11 @@
 #SBATCH --cpus-per-task=4             # Request 4 CPUs
 #SBATCH --mem=32G                     # Request 32GB RAM
 #SBATCH --time=04:00:00               # Max duration
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 
 # 1. Setup
 mkdir -p logs
 echo "Job running on node: $(hostname)"
-source $HOME/.cargo/env  # Ensure uv is loaded
 
 # 2. Task 1: Question Answering (RoBERTa)
 # Instruction: "fine-tune RoBERTa with LoRA on the SQUAD-v2 dataset"

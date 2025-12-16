@@ -33,7 +33,7 @@ def main():
         output_dir=output_path,
         eval_strategy="epoch",
         learning_rate=args.learning_rate,
-        per_device_train_batch_size=args.batch_size,
+        per_device_train_batch_size=8,
         num_train_epochs=args.epochs,
         save_strategy="epoch",
         remove_unused_columns=False,

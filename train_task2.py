@@ -37,7 +37,7 @@ def main():
 
     training_args = TrainingArguments(
         output_dir=output_path,
-        per_device_train_batch_size=actual_batch_size,
+        per_device_train_batch_size=4,
         gradient_accumulation_steps=4,
         learning_rate=args.learning_rate,
         num_train_epochs=args.epochs,
