@@ -2,7 +2,7 @@
 #SBATCH --job-name=nlp_pa3_main
 #SBATCH --output=logs/main_%j.out
 #SBATCH --error=logs/main_%j.err
-#SBATCH --partition=student-gpu-001   # Or 'regular' or 'gpu48g'
+#SBATCH --partition=regular  # Or 'regular' or 'gpu48g'
 #SBATCH --gres=gpu:1                  # Mandatory: Request 1 GPU
 #SBATCH --cpus-per-task=4             # Request 4 CPUs
 #SBATCH --mem=32G                     # Request 32GB RAM

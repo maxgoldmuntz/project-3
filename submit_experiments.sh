@@ -2,7 +2,7 @@
 #SBATCH --job-name=nlp_pa3_exp
 #SBATCH --output=logs/exp_%j.out
 #SBATCH --error=logs/exp_%j.err
-#SBATCH --partition=student-gpu-001
+#SBATCH --partition=regular
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
