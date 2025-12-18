@@ -27,7 +27,7 @@ def main():
     peft_config = LoraConfig(task_type=TaskType.QUESTION_ANS, inference_mode=False, r=args.lora_rank, lora_alpha=32, lora_dropout=0.1)
     model = get_peft_model(model, peft_config)
 
-    output_path = os.path.join(args.output_dir, f"qa_r{args.lora_rank}_sz{args.train_size}")
+    output_path = args.output_dir #os.path.join(args.output_dir, f"qa_r{args.lora_rank}_sz{args.train_size}")
 
     training_args = TrainingArguments(
         output_dir=output_path,
@@ -47,6 +47,12 @@ def main():
     )
     trainer.train()
     trainer.save_model()
+    # --- SAVE SCORES AUTOMATICALLY
+    print(">>> Saving Final Scores...")
+    metrics = trainer.evaluate()
+    trainer.save_metrics("eval", metrics)
+    trainer.save_state()
+    # ---------------------------------------------
 
 if __name__ == "__main__":
     main()

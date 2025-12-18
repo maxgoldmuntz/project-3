@@ -30,7 +30,7 @@ def main():
         val_data = val_data.select(range(min(len(val_data), args.max_eval_samples)))
 
     peft_config = LoraConfig(r=args.lora_rank, lora_alpha=32, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM", target_modules=["q_proj", "v_proj"])
-    output_path = os.path.join(args.output_dir, f"code_r{args.lora_rank}_sz{args.train_size}")
+    output_path = args.output_dir #os.path.join(args.output_dir, f"code_r{args.lora_rank}_sz{args.train_size}")
 
     actual_batch_size = 1 if is_mac_mps else args.batch_size
     use_gradient_checkpointing = True if is_mac_mps else False
@@ -57,6 +57,12 @@ def main():
     )
     trainer.train()
     trainer.save_model()
+    # ---SAVE SCORES AUTOMATICALLY
+    print(">>> Saving Final Scores...")
+    metrics = trainer.evaluate()
+    trainer.save_metrics("eval", metrics)
+    trainer.save_state()
+    # ---------------------------------------------
 
 if __name__ == "__main__":
     main()
