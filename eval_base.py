@@ -5,45 +5,37 @@ import tempfile
 import os
 import json
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import PeftModel
 from datasets import load_dataset
 
 BASE_MODEL = "JetBrains/Mellum-4b-base"
-OUTPUT_FILE = "codegen_results.json"
-SUMMARY_FILE = "metrics_summary.json"
+OUTPUT_DIR = "results/base_model_baseline"
+
+# Ensure output directory exists
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def execute_python_code(code):
     with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
         f.write(code)
         temp_name = f.name
     try:
-        # 5 second timeout to prevent infinite loops
+        # 5 second timeout
         result = subprocess.run(['python', temp_name], capture_output=True, text=True, timeout=5)
         return result.returncode == 0
-    except subprocess.TimeoutExpired:
-        return False
-    except Exception:
+    except:
         return False
     finally:
         if os.path.exists(temp_name): os.remove(temp_name)
 
 def main():
-    args = utils.get_args()
+    print(f"Evaluating BASE MODEL: {BASE_MODEL}")
 
-    if not args.adapter_model or not os.path.exists(args.adapter_model):
-        raise ValueError(f"Invalid adapter path: {args.adapter_model}")
-
-    print(f"Evaluating Adapter: {args.adapter_model}")
-
-    # Load Tokenizer & Model
+    # Load Tokenizer & Model (NO ADAPTER)
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
-    base_model = AutoModelForCausalLM.from_pretrained(BASE_MODEL, device_map="auto", torch_dtype=torch.float16)
-    model = PeftModel.from_pretrained(base_model, args.adapter_model)
+    model = AutoModelForCausalLM.from_pretrained(BASE_MODEL, device_map="auto", torch_dtype=torch.float16)
     model.eval()
 
-    # Load Test Data (Fixed to 50 examples)
+    # Same 50 examples
     dataset = load_dataset("flytech/python-codes-25k")
-    # Complex split logic to ensure we don't leak training data
     test_data = dataset["train"].train_test_split(test_size=0.2, seed=42)["test"].train_test_split(test_size=0.5, seed=42)["test"].select(range(50))
 
     results_container = []
@@ -61,23 +53,21 @@ def main():
         generated_full = tokenizer.decode(outputs[0], skip_special_tokens=True)
         generated_code = utils.extract_python_code(generated_full)
         
-        # Print progress every 10 items so you know it's alive
-        if (i + 1) % 10 == 0:
-            print(f"  Processed {i + 1}/{len(test_data)}")
+        if (i + 1) % 10 == 0: print(f"  Processed {i + 1}/{len(test_data)}")
 
         results_container.append({
             "instruction": instruction, "truth": truth, 
             "generated_code": generated_code
         })
 
-    # Save Raw Outputs
-    with open(os.path.join(args.adapter_model, OUTPUT_FILE), "w") as f:
+    # Save outputs
+    with open(os.path.join(OUTPUT_DIR, "codegen_results.json"), "w") as f:
         json.dump(results_container, f, indent=4)
 
     # Calculate Metrics
     predictions = [item['generated_code'] for item in results_container]
     references = [[item['truth']] for item in results_container]
-
+    
     metrics = {}
     try:
         metrics["bleu"] = utils.compute_bleu(predictions, references)
@@ -87,10 +77,10 @@ def main():
     exec_count = sum([1 for item in results_container if execute_python_code(item['generated_code'])])
     metrics["executability"] = exec_count / len(results_container)
 
-    print(f"FINAL METRICS: {metrics}")
+    print(f"FINAL BASE METRICS: {metrics}")
 
-    # Save Summary for Graphs
-    with open(os.path.join(args.adapter_model, SUMMARY_FILE), "w") as f:
+    # Save Summary
+    with open(os.path.join(OUTPUT_DIR, "metrics_summary.json"), "w") as f:
         json.dump(metrics, f, indent=4)
 
 if __name__ == "__main__":

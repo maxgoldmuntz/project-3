@@ -1,0 +1,24 @@
+#!/bin/bash
+# ====================================================
+#  EVALUATION JOB FOR EXPERIMENTS (R16 & R32)
+# ====================================================
+#SBATCH --job-name="eval_exp"
+#SBATCH --output="logs/eval_experiments.out"
+#SBATCH --error="logs/eval_experiments.err"
+#SBATCH --time=01:00:00
+#SBATCH --partition=regular
+#SBATCH --gres=gpu:1
+#SBATCH --mem=24G
+
+# Fix memory fragmentation for inference
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+echo ">>> Starting Evaluation for Rank 16..."
+uv run eval_task2.py --adapter_model ./results/code_r16_sz1.0 --model_name JetBrains/Mellum-4b-base
+
+echo "----------------------------------------------------"
+
+echo ">>> Starting Evaluation for Rank 32..."
+uv run eval_task2.py --adapter_model ./results/code_r32_sz1.0 --model_name JetBrains/Mellum-4b-base
+
+echo ">>> All Evaluations Complete."

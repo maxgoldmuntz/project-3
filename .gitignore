@@ -12,3 +12,28 @@ wheels/
 # IDEs or editors
 .vscode/
 .idea/
+.venv/
+
+
+# --- Large Model Files (NEVER upload these) ---
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+
+# --- Folders to Ignore ---
+results/
+logs/
+.venv/
+__pycache__/
+wandb/
+cache/
+data/
+
+# --- Slurm/Cluster Outputs ---
+*.out
+*.err
+
+# --- OS Junk ---
+.DS_Store
